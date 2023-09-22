@@ -12,6 +12,8 @@ public interface WishToSeeDao {
 
     WishToSee listByWishId(int wishId);
 
+    WishToSee listByPlace (String placeName);
+
     List<WishToSee> listByCity(String cityName);
 
     WishToSee createNewOne(WishToSee newWishToSee);

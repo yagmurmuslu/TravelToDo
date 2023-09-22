@@ -200,7 +200,15 @@ public class TraveltodoApplication {
 	}
 
 	private void handleDeleteWish(){
-
+		menu.printHeadLine("Delete wish");
+		String placeName = getUserInput("Enter place name ");
+		WishToSee place = wishToSeeDao.listByPlace(placeName);
+		if (place != null){
+			wishToSeeDao.delete(place.getWishId());
+		}
+		else{
+			System.out.println("\n*** User '" + place + "' does not exist. Please try again.");
+		}
 	}
 
 	private void handleSearchByCity(){

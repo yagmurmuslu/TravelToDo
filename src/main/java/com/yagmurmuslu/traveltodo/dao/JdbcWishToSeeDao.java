@@ -50,6 +50,19 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
     }
 
     @Override
+    public WishToSee listByPlace(String placeName) {
+        try{
+            return jdbcTemplate.queryForObject(
+                    "SELECT * FROM wish_to_see WHERE place_name = ?",
+                    this::mapRowToWishToSee,
+                    placeName
+            );
+        } catch ( EmptyResultDataAccessException exception) {
+            return null;
+        }
+    }
+
+    @Override
     public List<WishToSee> listByCity(String cityName) {
         try{
             return jdbcTemplate.query(
