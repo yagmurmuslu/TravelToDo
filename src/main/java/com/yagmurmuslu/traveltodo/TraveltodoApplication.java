@@ -114,7 +114,15 @@ public class TraveltodoApplication {
 	}
 
 	private void handleDeleteUser(){
-
+		menu.printHeadLine("User delete");
+		String userName = getUserInput("Enter user name: ");
+		User user = this.userDao.findByUserName(userName);
+		if (user != null){
+			this.userDao.deleteUser(user.getId());
+		}
+		else{
+			System.out.println("\n*** User '" + userName + "' does not exist. Please try again.");
+		}
 	}
 
 	private void handleUsersSearch(){
