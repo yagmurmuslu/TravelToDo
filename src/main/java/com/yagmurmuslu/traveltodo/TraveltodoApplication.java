@@ -8,8 +8,6 @@ import com.yagmurmuslu.traveltodo.model.User;
 import com.yagmurmuslu.traveltodo.model.WishToSee;
 import com.yagmurmuslu.traveltodo.view.Menu;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -48,7 +46,8 @@ public class TraveltodoApplication {
 																	WISH_MENU_OPTION_SEARCH_BY_USER,
 																	WISH_MENU_OPTION_SEARCH_BY_CITY,
 																	WISH_MENU_OPTION_UPDATE,
-																	WISH_MENU_OPTION_DELETE };
+																	WISH_MENU_OPTION_DELETE,
+																	WISH_MENU_OPTION_CREATE };
 
 	private final Menu menu;
 	private final UserDao userDao;
@@ -178,7 +177,7 @@ public class TraveltodoApplication {
 		}else if(choice.equals(WISH_MENU_OPTION_UPDATE)){
 			this.handleWishlistUpdate();
 		}else if(choice.equals(WISH_MENU_OPTION_CREATE)){
-			this.handleWishlistCreate();
+			this.handleCreateNewPlace();
 		}
 	}
 
@@ -227,10 +226,40 @@ public class TraveltodoApplication {
 	}
 
 	private void handleWishlistUpdate(){
-
+		menu.printHeadLine("Wish update");
+		String placeName = getUserInput("Enter place name");
+		WishToSee place = wishToSeeDao.listByPlace(placeName);
+		String cityName = getUserInput("Enter city name");
+		place.setCity(cityName);
+		wishToSeeDao.update(place);
 	}
 
-	private void handleWishlistCreate(){
+	private void handleCreateNewPlace(){
+		menu.printHeadLine("Wish create");
+		String userName = getUserInput("Enter user name");
+		User user = userDao.findByUserName(userName);
+		int userId = user.getId();
+
+		String placeName = getUserInput("Enter place name");
+		String cityName = getUserInput("Enter city name");
+		String address = getUserInput("Enter address (optional)");
+		String goodForKids = getUserInput("Is it kid friendly? [y|n]");
+		boolean goodForKidsBoolean = false;
+
+		if(goodForKids.equals("y")){
+			goodForKidsBoolean = true;
+		} else if(goodForKids.equals("n")){
+			goodForKidsBoolean = false;
+		}
+
+		WishToSee newArea = new WishToSee();
+		newArea.setPalaceName(placeName);
+		newArea.setCity(cityName);
+		newArea.setAddress(address);
+		newArea.setForKids(goodForKidsBoolean);
+		newArea.setUserId(userId);
+
+		wishToSeeDao.createNewOne(newArea);
 
 	}
 

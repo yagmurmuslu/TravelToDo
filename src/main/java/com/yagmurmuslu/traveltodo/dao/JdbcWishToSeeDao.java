@@ -82,14 +82,18 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
                         "VALUES (?, ?, ?, ?, ?, ? ) RETURNING wish_id;",
                 Integer.class,
                 newWishToSee.getCity(),
-                newWishToSee.getPalaceName()
+                newWishToSee.getPalaceName(),
+                newWishToSee.getAddress(),
+                newWishToSee.getForKids(),
+                newWishToSee.getCompleted(),
+                newWishToSee.getUserId()
         );
         return listByWishId(newPlace);
     }
 
     @Override
     public void update(WishToSee updateWishToSee) {
-        jdbcTemplate.update("UPDATE wish_to_see SET city = ? WHERE wish_id = ?", updateWishToSee.getCity());
+        jdbcTemplate.update("UPDATE wish_to_see SET city = ? WHERE wish_id = ?", updateWishToSee.getCity(), updateWishToSee.getWishId());
     }
 
     @Override
