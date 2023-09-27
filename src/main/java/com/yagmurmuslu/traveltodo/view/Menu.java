@@ -40,7 +40,14 @@ public class Menu {
         out.println("Enter new user name: ");
         updatedUser.setName(in.nextLine());
         out.println("Enter new password: ");
-        updatedUser.setPassword(in.nextLine());
+        String firstPassword = in.nextLine();
+        out.println(("Enter new password again: "));
+        String secondPassword = in.nextLine();
+        if(firstPassword.equals(secondPassword)){
+            updatedUser.setPassword(secondPassword);
+        } else {
+            out.println("Passwords do not match");
+        }
         updatedUser.setId(user.getId());
         return updatedUser;
     }

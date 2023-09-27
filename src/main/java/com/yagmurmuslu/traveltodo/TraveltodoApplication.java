@@ -12,18 +12,35 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class TraveltodoApplication {
 
+	// Menu options
+
 	private static final String MAIN_MENU_OPTION_USERS = "Users";
 	private static final String MAIN_MENU_OPTION_WISHES = "Wishes";
+
+	private static final String MAIN_MENU_OPTION_LOGIN = "Login";
 	private static final String MAIN_MENU_OPTION_EXIT = "Exit";
 	private static final String[] MAIN_MENU_OPTIONS = new String[] { MAIN_MENU_OPTION_USERS,
 																	 MAIN_MENU_OPTION_WISHES,
+																	 MAIN_MENU_OPTION_LOGIN,
 																	 MAIN_MENU_OPTION_EXIT };
 
+	//Return to menu
+
 	private static final String MENU_OPTION_RETURN_TO_MAIN = "Return to main menu";
+
+	//Login menu
+
+
+	private static final String[] LOGIN_MENU_OPTION = new String[] {
+	};
+
+
+	//User menu options
 
 	private static final String USERS_MENU_OPTION_ALL_USERS = "Show all users";
 	private static final String USER_MENU_OPTION_SEARCH_BY_NAME = "Find user search by name";
@@ -35,6 +52,8 @@ public class TraveltodoApplication {
 																   USER_MENU_OPTION_UPDATE_NAME,
 																   USER_MENU_OPTION_ADD_USER,
 																   USER_MENU_OPTION_DELETE_USER };
+
+	//Wish to see menu options
 
 	private static final String WISH_MENU_OPTION_ALL_WISH = "Show all wish to see";
 	private static final String WISH_MENU_OPTION_SEARCH_BY_USER = "Show all wish to see for user";
@@ -82,11 +101,32 @@ public class TraveltodoApplication {
 				handleUsers();
 			}else if(choice.equals(MAIN_MENU_OPTION_WISHES)){
 				handleWishes();
+			} else if(choice.equals(MAIN_MENU_OPTION_LOGIN)){
+				handleLogin();
 			}else if(choice.equals(MAIN_MENU_OPTION_EXIT)){
 				running = false;
 			}
 		}
 	}
+
+	//Login menu option creating
+
+	private void handleLogin() {
+		menu.printHeadLine("Login");
+		String choice = (String)menu.getChoiceFromOptions(LOGIN_MENU_OPTION);
+
+		String userName = this.getUserInput("username: ");
+		String password = this.getUserInput("password: ");
+
+		User user = userDao.findByUserName(userName);
+		if(user.getPassword().equals(password)) {
+			System.out.println("Login successful");
+		} else {
+			System.out.println("Login is not success");
+		}
+	}
+
+	//User menu option creating
 
 	private void handleUsers(){
 		menu.printHeadLine("Users");
@@ -115,7 +155,7 @@ public class TraveltodoApplication {
 	private void handleDeleteUser(){
 		menu.printHeadLine("User delete");
 		String userName = getUserInput("Enter user name: ");
-		User user = this.userDao.findByUserName(userName);
+		User user = this.userDao.findByUserName(userName.toLowerCase(Locale.ROOT));
 		if (user != null){
 			this.userDao.deleteUser(user.getId());
 		}
@@ -127,7 +167,7 @@ public class TraveltodoApplication {
 	private void handleUsersSearch(){
 		menu.printHeadLine("User search");
 		String name = getUserInput("Enter name to search for");
-		User user = userDao.findByUserName(name);
+		User user = userDao.findByUserName(name.toLowerCase());
 		ArrayList<User> users = new ArrayList<>();
 		users.add(user);
 		listUsers(users);
@@ -137,7 +177,7 @@ public class TraveltodoApplication {
 		menu.printHeadLine("Update user name");
 		List<User> allUser = userDao.getAllUser();
 		if(allUser.size() > 0){
-			System.out.println("\n*** Choose a User");
+			System.out.println("\n Choose a User");
 			User selectedUser = (User)menu.getChoiceFromOptions(allUser.toArray());
 			User updatedUser = menu.updateUser(selectedUser);
 			userDao.update(updatedUser);
@@ -162,6 +202,8 @@ public class TraveltodoApplication {
 		List<User> allUsers = userDao.getAllUser();
 		listUsers(allUsers);
 	}
+
+	//Wish to see option creating
 
 	private void handleWishes(){
 		menu.printHeadLine("Wish to see");
@@ -201,7 +243,7 @@ public class TraveltodoApplication {
 	private void handleDeleteWish(){
 		menu.printHeadLine("Delete wish");
 		String placeName = getUserInput("Enter place name ");
-		WishToSee place = wishToSeeDao.listByPlace(placeName);
+		WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase());
 		if (place != null){
 			wishToSeeDao.delete(place.getWishId());
 		}
@@ -213,14 +255,14 @@ public class TraveltodoApplication {
 	private void handleSearchByCity(){
 		menu.printHeadLine("City search");
 		String cityName = getUserInput("Enter city name");
-		List<WishToSee> wishToSeeByCityName = wishToSeeDao.listByCity(cityName);
+		List<WishToSee> wishToSeeByCityName = wishToSeeDao.listByCity(cityName.toLowerCase());
 		listWishes(wishToSeeByCityName);
 	}
 
 	private void handleSearchByUserId(){
 		menu.printHeadLine("User search");
 		String userName = getUserInput("Enter user name ");
-		User user = this.userDao.findByUserName(userName);
+		User user = this.userDao.findByUserName(userName.toLowerCase());
 		List<WishToSee> wishToSeeByUserId = this.wishToSeeDao.listByUserId(user.getId());
 		this.listWishes(wishToSeeByUserId);
 	}
@@ -228,16 +270,16 @@ public class TraveltodoApplication {
 	private void handleWishlistUpdate(){
 		menu.printHeadLine("Wish update");
 		String placeName = getUserInput("Enter place name");
-		WishToSee place = wishToSeeDao.listByPlace(placeName);
+		WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase());
 		String cityName = getUserInput("Enter city name");
-		place.setCity(cityName);
+		place.setCity(cityName.toLowerCase());
 		wishToSeeDao.update(place);
 	}
 
 	private void handleCreateNewPlace(){
 		menu.printHeadLine("Wish create");
 		String userName = getUserInput("Enter user name");
-		User user = userDao.findByUserName(userName);
+		User user = userDao.findByUserName(userName.toLowerCase());
 		int userId = user.getId();
 
 		String placeName = getUserInput("Enter place name");
