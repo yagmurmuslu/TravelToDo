@@ -18,7 +18,7 @@ import java.util.Scanner;
 public class TraveltodoApplication {
 
 	// Menu options
-
+	private static boolean isLogin = false;
 	private static final String MAIN_MENU_OPTION_USERS = "Users";
 	private static final String MAIN_MENU_OPTION_WISHES = "Wishes";
 
@@ -45,13 +45,16 @@ public class TraveltodoApplication {
 	private static final String USERS_MENU_OPTION_ALL_USERS = "Show all users";
 	private static final String USER_MENU_OPTION_SEARCH_BY_NAME = "Find user search by name";
 	private static final String USER_MENU_OPTION_UPDATE_NAME = "Update user name";
+	private static final String USER_MENU_OPTION_UPDATE_PASSWORD = "Update user password";
 	private static final String USER_MENU_OPTION_ADD_USER = "Add new user";
 	private static final String USER_MENU_OPTION_DELETE_USER = "Delete user";
 	private static final String[] USER_MENU_OPTION = new String[]{ USERS_MENU_OPTION_ALL_USERS,
 																   USER_MENU_OPTION_SEARCH_BY_NAME,
 																   USER_MENU_OPTION_UPDATE_NAME,
+																   USER_MENU_OPTION_UPDATE_PASSWORD,
 																   USER_MENU_OPTION_ADD_USER,
-																   USER_MENU_OPTION_DELETE_USER };
+																   USER_MENU_OPTION_DELETE_USER,
+																   MENU_OPTION_RETURN_TO_MAIN};
 
 	//Wish to see menu options
 
@@ -97,14 +100,16 @@ public class TraveltodoApplication {
 		while (running) {
 			menu.printHeadLine("Main Menu");
 			String choice = (String)menu.getChoiceFromOptions(MAIN_MENU_OPTIONS);
-			if(choice.equals(MAIN_MENU_OPTION_USERS)){
+			if(choice.equals(MAIN_MENU_OPTION_USERS) && isLogin){
 				handleUsers();
-			}else if(choice.equals(MAIN_MENU_OPTION_WISHES)){
+			}else if(choice.equals(MAIN_MENU_OPTION_WISHES) && isLogin){
 				handleWishes();
 			} else if(choice.equals(MAIN_MENU_OPTION_LOGIN)){
 				handleLogin();
 			}else if(choice.equals(MAIN_MENU_OPTION_EXIT)){
 				running = false;
+			} else if(!isLogin) {
+				System.out.println("You must be login!");
 			}
 		}
 	}
@@ -121,6 +126,7 @@ public class TraveltodoApplication {
 		User user = userDao.findByUserName(userName);
 		if(user.getPassword().equals(password)) {
 			System.out.println("Login successful");
+			isLogin = true;
 		} else {
 			System.out.println("Login is not success");
 		}
@@ -138,7 +144,9 @@ public class TraveltodoApplication {
 		}else if(choice.equals(USER_MENU_OPTION_SEARCH_BY_NAME)){
 			this.handleUsersSearch();
 		}else if(choice.equals(USER_MENU_OPTION_UPDATE_NAME)){
-			this.handleUpdateUser();
+			this.handleUpdateUserName();
+		}else if(choice.equals(USER_MENU_OPTION_UPDATE_PASSWORD)){
+			this.handleUpdateUserPassword();
 		}else if(choice.equals(USERS_MENU_OPTION_ALL_USERS)){
 			this.handleListAllUsers();
 		}
@@ -173,17 +181,26 @@ public class TraveltodoApplication {
 		listUsers(users);
 	}
 
-	private void handleUpdateUser(){
+	private void handleUpdateUserName(){
 		menu.printHeadLine("Update user name");
 		List<User> allUser = userDao.getAllUser();
 		if(allUser.size() > 0){
 			System.out.println("\n Choose a User");
 			User selectedUser = (User)menu.getChoiceFromOptions(allUser.toArray());
-			User updatedUser = menu.updateUser(selectedUser);
-			userDao.update(updatedUser);
+			User updatedUser = menu.updateUserName(selectedUser);
+			userDao.updateUserName(updatedUser);
 		}else {
 			System.out.println("\n*** No result");
 		}
+	}
+
+	private void handleUpdateUserPassword(){
+		menu.printHeadLine("Update user password");
+		String name = getUserInput("Enter user name: ");
+		User user = userDao.findByUserName(name.toLowerCase());
+		User updatedUserPassword = menu.updateUserPassword(user);
+		userDao.updateUserPassword(updatedUserPassword);
+
 	}
 
 	private void listUsers(List<User> users){
