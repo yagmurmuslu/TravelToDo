@@ -13,13 +13,6 @@ public class JdbcUserDao implements UserDao{
 
     private  final JdbcTemplate jdbcTemplate;
     public JdbcUserDao(DataSource dataSource) {this.jdbcTemplate= new JdbcTemplate(dataSource);}
-    @Override
-    public List<User> findAll() {
-        return jdbcTemplate.query(
-                "SELECT * FROM users",
-                this::mapRowToUser
-        );
-    }
 
     @Override
     public User getUserById(int userId) {
@@ -71,10 +64,14 @@ public class JdbcUserDao implements UserDao{
     }
 
     @Override
-    public void update(User updateUser) {
-        jdbcTemplate.update("UPDATE users SET name = ? WHERE user_id = ?", updateUser.getName(), updateUser.getId());
+    public void updateUserName(User updateUserName) {
+        jdbcTemplate.update("UPDATE users SET name = ? WHERE user_id = ?", updateUserName.getName(), updateUserName.getId());
     }
 
+    @Override
+    public void updateUserPassword(User updateUserPassword) {
+        jdbcTemplate.update("UPDATE users SET password_hash = ? WHERE user_id = ?", updateUserPassword.getPassword(), updateUserPassword.getId());
+    }
 
     private User mapRowToUser (ResultSet row, int rowNum) throws SQLException {
         return new User(

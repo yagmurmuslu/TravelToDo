@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface UserDao {
 
-    List<User> findAll();
-
     List<User> getAllUser();
 
     User getUserById(int userId);
@@ -18,5 +16,7 @@ public interface UserDao {
 
     void deleteUser(int userId);
 
-    void update(User updateUser);
+    void updateUserName(User updateUserName);
+
+    void updateUserPassword(User updateUserPassword);
 }

@@ -35,21 +35,27 @@ public class Menu {
         System.out.println();
     }
 
-    public User updateUser(User user){
+    public User updateUserName(User user){
         User updatedUser = new User();
         out.println("Enter new user name: ");
         updatedUser.setName(in.nextLine());
+        updatedUser.setId(user.getId());
+        return updatedUser;
+    }
+
+    public User updateUserPassword(User userPassword) {
+        User updatedUserPassword = new User();
         out.println("Enter new password: ");
         String firstPassword = in.nextLine();
         out.println(("Enter new password again: "));
         String secondPassword = in.nextLine();
         if(firstPassword.equals(secondPassword)){
-            updatedUser.setPassword(secondPassword);
+            updatedUserPassword.setPassword(secondPassword);
         } else {
             out.println("Passwords do not match");
         }
-        updatedUser.setId(user.getId());
-        return updatedUser;
+        updatedUserPassword.setId(userPassword.getId());
+        return updatedUserPassword;
     }
 
     private Object getChoiceFromUserInput(Object[] options) {
