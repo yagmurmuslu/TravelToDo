@@ -10,7 +10,6 @@ import com.yagmurmuslu.traveltodo.view.Menu;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -19,48 +18,49 @@ public class TraveltodoApplication {
 
 	// Menu options
 	private static boolean isLogin = false;
-	private static final String MAIN_MENU_OPTION_USERS = "Users";
-	private static final String MAIN_MENU_OPTION_WISHES = "Wishes";
 
-	private static final String MAIN_MENU_OPTION_LOGIN = "Login";
-	private static final String MAIN_MENU_OPTION_EXIT = "Exit";
-	private static final String[] MAIN_MENU_OPTIONS = new String[] { MAIN_MENU_OPTION_USERS,
-																	 MAIN_MENU_OPTION_WISHES,
-																	 MAIN_MENU_OPTION_LOGIN,
-																	 MAIN_MENU_OPTION_EXIT };
+	private static final String WELCOME_MENU_OPTION_LOGIN = "Login";
+	private static final String WELCOME_MENU_OPTION_LOOK_ALL_WISHES = "Look all wishes";
+	private static final String WELCOME_MENU_OPTION_CREATE_NEW_ACCOUNT = "Create new account";
+	private static final String[] MAIN_MENU_OPTIONS = new String[] { WELCOME_MENU_OPTION_LOGIN,
+																	 WELCOME_MENU_OPTION_LOOK_ALL_WISHES,
+																	 WELCOME_MENU_OPTION_CREATE_NEW_ACCOUNT };
 
 	//Return to menu
 
 	private static final String MENU_OPTION_RETURN_TO_MAIN = "Return to main menu";
 
 	//Login menu
+	private static final String MAIN_MENU_OPTION_USERS = "Users";
+	private static final String MAIN_MENU_OPTION_WISHES = "Wishes";
+	private static final String MAIN_MENU_OPTION_LOGOUT = "Logout";
+	private static final String[] LOGIN_MENU_OPTION = { MAIN_MENU_OPTION_USERS,
+														MAIN_MENU_OPTION_WISHES,
+														MAIN_MENU_OPTION_LOGOUT };
 
 
-	private static final String[] LOGIN_MENU_OPTION = new String[] {
-	};
-
+	//Logout
+	private static final String OPTION_YES = "Yes";
+	private static final String OPTION_NO = "No";
+	private static final String[] LOGOUT_OPTIONS = { OPTION_YES,
+													 OPTION_NO };
 
 	//User menu options
-
 	private static final String USERS_MENU_OPTION_ALL_USERS = "Show all users";
-	private static final String USER_MENU_OPTION_SEARCH_BY_NAME = "Find user search by name";
 	private static final String USER_MENU_OPTION_UPDATE_NAME = "Update user name";
 	private static final String USER_MENU_OPTION_UPDATE_PASSWORD = "Update user password";
-	private static final String USER_MENU_OPTION_ADD_USER = "Add new user";
 	private static final String USER_MENU_OPTION_DELETE_USER = "Delete user";
 	private static final String[] USER_MENU_OPTION = new String[]{ USERS_MENU_OPTION_ALL_USERS,
-																   USER_MENU_OPTION_SEARCH_BY_NAME,
 																   USER_MENU_OPTION_UPDATE_NAME,
 																   USER_MENU_OPTION_UPDATE_PASSWORD,
-																   USER_MENU_OPTION_ADD_USER,
 																   USER_MENU_OPTION_DELETE_USER,
-																   MENU_OPTION_RETURN_TO_MAIN};
+																   MENU_OPTION_RETURN_TO_MAIN };
 
 	//Wish to see menu options
 
-	private static final String WISH_MENU_OPTION_ALL_WISH = "Show all wish to see";
-	private static final String WISH_MENU_OPTION_SEARCH_BY_USER = "Show all wish to see for user";
-	private static final String WISH_MENU_OPTION_SEARCH_BY_CITY = "Show all wish to see by city name";
+	private static final String WISH_MENU_OPTION_ALL_WISH = "Show all wishes";
+	private static final String WISH_MENU_OPTION_SEARCH_BY_USER = "See user wishlist";
+	private static final String WISH_MENU_OPTION_SEARCH_BY_CITY = "Search city and see all wish place";
 	private static final String WISH_MENU_OPTION_UPDATE = "Update wish to see";
 	private static final String WISH_MENU_OPTION_DELETE = "Delete wish to see";
 	private static final String WISH_MENU_OPTION_CREATE = "Create new wish to see";
@@ -69,7 +69,8 @@ public class TraveltodoApplication {
 																	WISH_MENU_OPTION_SEARCH_BY_CITY,
 																	WISH_MENU_OPTION_UPDATE,
 																	WISH_MENU_OPTION_DELETE,
-																	WISH_MENU_OPTION_CREATE };
+																	WISH_MENU_OPTION_CREATE,
+			  													    MENU_OPTION_RETURN_TO_MAIN };
 
 	private final Menu menu;
 	private final UserDao userDao;
@@ -98,27 +99,42 @@ public class TraveltodoApplication {
 	private void run(){
 		boolean running = true;
 		while (running) {
-			menu.printHeadLine("Main Menu");
-			String choice = (String)menu.getChoiceFromOptions(MAIN_MENU_OPTIONS);
-			if(choice.equals(MAIN_MENU_OPTION_USERS) && isLogin){
-				handleUsers();
-			}else if(choice.equals(MAIN_MENU_OPTION_WISHES) && isLogin){
-				handleWishes();
-			} else if(choice.equals(MAIN_MENU_OPTION_LOGIN)){
-				handleLogin();
-			}else if(choice.equals(MAIN_MENU_OPTION_EXIT)){
-				running = false;
-			} else if(!isLogin) {
-				System.out.println("You must be login!");
+			if(isLogin) {
+				menu.printHeadLine("Main Menu \n You are logged in");
+				String choice = (String)menu.getChoiceFromOptions(LOGIN_MENU_OPTION);
+
+				if(choice.equals(MAIN_MENU_OPTION_USERS)) {
+					this.handleUsers();
+				} else if (choice.equals(MAIN_MENU_OPTION_WISHES)) {
+					this.handleWishes();
+				} else if (choice.equals(MAIN_MENU_OPTION_LOGOUT)) {
+					System.out.println("Are you sure to logout?");
+					String logoutChoice = (String)menu.getChoiceFromOptions(LOGOUT_OPTIONS);
+					if(logoutChoice.equals(OPTION_YES)) {
+						isLogin = false;
+					}
+				}
+			} else {
+				menu.printHeadLine("Welcome travel ToDo application \n P.S. Before start adding new place ensure you are logged in");
+
+				String choice = (String)menu.getChoiceFromOptions(MAIN_MENU_OPTIONS);
+				if(choice.equals(WELCOME_MENU_OPTION_LOGIN)){
+					handleLogin();
+				}else if(choice.equals(WELCOME_MENU_OPTION_LOOK_ALL_WISHES)){
+					handleAllWishlist();
+				}else if(choice.equals(WELCOME_MENU_OPTION_CREATE_NEW_ACCOUNT)){
+					handleAddNewUser();
+				}else if(!isLogin) {
+					System.out.println("You must be login!");
+				}
 			}
+
 		}
 	}
 
 	//Login menu option creating
-
 	private void handleLogin() {
 		menu.printHeadLine("Login");
-		String choice = (String)menu.getChoiceFromOptions(LOGIN_MENU_OPTION);
 
 		String userName = this.getUserInput("username: ");
 		String password = this.getUserInput("password: ");
@@ -133,22 +149,21 @@ public class TraveltodoApplication {
 	}
 
 	//User menu option creating
-
 	private void handleUsers(){
-		menu.printHeadLine("Users");
-		String choice = (String)menu.getChoiceFromOptions(USER_MENU_OPTION);
-		if(choice.equals(USER_MENU_OPTION_ADD_USER)){
-			this.handleAddNewUser();
-		}else if(choice.equals(USER_MENU_OPTION_DELETE_USER)){
-			this.handleDeleteUser();
-		}else if(choice.equals(USER_MENU_OPTION_SEARCH_BY_NAME)){
-			this.handleUsersSearch();
-		}else if(choice.equals(USER_MENU_OPTION_UPDATE_NAME)){
-			this.handleUpdateUserName();
-		}else if(choice.equals(USER_MENU_OPTION_UPDATE_PASSWORD)){
-			this.handleUpdateUserPassword();
-		}else if(choice.equals(USERS_MENU_OPTION_ALL_USERS)){
-			this.handleListAllUsers();
+		while (true) {
+			menu.printHeadLine("Users menu");
+			String choice = (String)menu.getChoiceFromOptions(USER_MENU_OPTION);
+			if(choice.equals(USER_MENU_OPTION_DELETE_USER)){
+				this.handleDeleteUser();
+			}else if(choice.equals(USER_MENU_OPTION_UPDATE_NAME)){
+				this.handleUpdateUserName();
+			}else if(choice.equals(USER_MENU_OPTION_UPDATE_PASSWORD)){
+				this.handleUpdateUserPassword();
+			}else if(choice.equals(USERS_MENU_OPTION_ALL_USERS)){
+				this.handleListAllUsers();
+			} else if(choice.equals(MENU_OPTION_RETURN_TO_MAIN)) {
+				break;
+			}
 		}
 	}
 
@@ -158,6 +173,7 @@ public class TraveltodoApplication {
 
 		User newUser = new User(0, userName, password);
 		this.userDao.create(newUser);
+		System.out.println("Account created successfully!");
 	}
 
 	private void handleDeleteUser(){
@@ -170,15 +186,6 @@ public class TraveltodoApplication {
 		else{
 			System.out.println("\n*** User '" + userName + "' does not exist. Please try again.");
 		}
-	}
-
-	private void handleUsersSearch(){
-		menu.printHeadLine("User search");
-		String name = getUserInput("Enter name to search for");
-		User user = userDao.findByUserName(name.toLowerCase());
-		ArrayList<User> users = new ArrayList<>();
-		users.add(user);
-		listUsers(users);
 	}
 
 	private void handleUpdateUserName(){
@@ -221,30 +228,36 @@ public class TraveltodoApplication {
 	}
 
 	//Wish to see option creating
-
 	private void handleWishes(){
-		menu.printHeadLine("Wish to see");
-		String choice = (String)menu.getChoiceFromOptions(WISH_MENU_OPTION);
-		if(choice.equals(WISH_MENU_OPTION_ALL_WISH)){
-			this.handleAllWishlist();
-		}else if(choice.equals(WISH_MENU_OPTION_DELETE)){
-			this.handleDeleteWish();
-		}else if(choice.equals(WISH_MENU_OPTION_SEARCH_BY_CITY)){
-			this.handleSearchByCity();
-		}else if(choice.equals(WISH_MENU_OPTION_SEARCH_BY_USER)){
-			this.handleSearchByUserId();
-		}else if(choice.equals(WISH_MENU_OPTION_UPDATE)){
-			this.handleWishlistUpdate();
-		}else if(choice.equals(WISH_MENU_OPTION_CREATE)){
-			this.handleCreateNewPlace();
+		while (true) {
+			menu.printHeadLine("Wishes menu");
+			String choice = (String)menu.getChoiceFromOptions(WISH_MENU_OPTION);
+			if(choice.equals(WISH_MENU_OPTION_ALL_WISH)){
+				this.handleAllWishlist();
+			}else if(choice.equals(WISH_MENU_OPTION_DELETE)){
+				this.handleDeleteWish();
+			}else if(choice.equals(WISH_MENU_OPTION_SEARCH_BY_CITY)){
+				this.handleSearchByCity();
+			}else if(choice.equals(WISH_MENU_OPTION_SEARCH_BY_USER)){
+				this.handleSearchByUserId();
+			}else if(choice.equals(WISH_MENU_OPTION_UPDATE)){
+				this.handleWishlistUpdate();
+			}else if(choice.equals(WISH_MENU_OPTION_CREATE)){
+				this.handleCreateNewPlace();
+			}else if(choice.equals(MENU_OPTION_RETURN_TO_MAIN)){
+				break;
+			}
 		}
+
 	}
 
 	private void listWishes(List<WishToSee> wishes) {
 		System.out.println();
 		if(wishes.size() > 0){
 			for(WishToSee wish: wishes){
-				System.out.println(wish.getPalaceName());
+				User user = userDao.getUserById(wish.getUserId());
+
+				System.out.println(wish.getPlaceName() + " in " + wish.getCity() + " by " + user.getName());
 			}
 		} else {
 			System.out.println("\n *** No result ***");
@@ -312,7 +325,7 @@ public class TraveltodoApplication {
 		}
 
 		WishToSee newArea = new WishToSee();
-		newArea.setPalaceName(placeName);
+		newArea.setPlaceName(placeName);
 		newArea.setCity(cityName);
 		newArea.setAddress(address);
 		newArea.setForKids(goodForKidsBoolean);

@@ -14,7 +14,7 @@ public class WishToSee {
 
     private int wishId;
     private String city;
-    private String palaceName;
+    private String placeName;
     private String address;
     private Boolean forKids;
     private Boolean completed;
