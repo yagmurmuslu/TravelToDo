@@ -66,7 +66,7 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
     public List<WishToSee> listByCity(String cityName) {
         try{
             return jdbcTemplate.query(
-                    "SELECT * FROM wish_to_see WHERE city = ? ",
+                    "SELECT * FROM wish_to_see WHERE LOWER(city) = ? ",
                     this::mapRowToWishToSee,
                     cityName
             );
@@ -82,7 +82,7 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
                         "VALUES (?, ?, ?, ?, ?, ? ) RETURNING wish_id;",
                 Integer.class,
                 newWishToSee.getCity(),
-                newWishToSee.getPalaceName(),
+                newWishToSee.getPlaceName(),
                 newWishToSee.getAddress(),
                 newWishToSee.getForKids(),
                 newWishToSee.getCompleted(),
