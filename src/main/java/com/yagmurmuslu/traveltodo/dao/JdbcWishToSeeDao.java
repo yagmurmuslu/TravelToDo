@@ -53,7 +53,7 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
     public WishToSee listByPlace(String placeName) {
         try{
             return jdbcTemplate.queryForObject(
-                    "SELECT * FROM wish_to_see WHERE place_name = ?",
+                    "SELECT * FROM wish_to_see WHERE LOWER(place_name) = ?",
                     this::mapRowToWishToSee,
                     placeName
             );
