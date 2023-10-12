@@ -16,9 +16,10 @@ import java.util.Scanner;
 
 public class TraveltodoApplication {
 
-	// Menu options
+	// Static variables Login
 	private static boolean isLogin = false;
 
+	// Constants Menu options
 	private static final String WELCOME_MENU_OPTION_LOGIN = "Login";
 	private static final String WELCOME_MENU_OPTION_LOOK_ALL_WISHES = "Look all wishes";
 	private static final String WELCOME_MENU_OPTION_CREATE_NEW_ACCOUNT = "Create new account";
@@ -26,7 +27,7 @@ public class TraveltodoApplication {
 																	 WELCOME_MENU_OPTION_LOOK_ALL_WISHES,
 																	 WELCOME_MENU_OPTION_CREATE_NEW_ACCOUNT };
 
-	//Return to menu
+	// Constants Return to menu
 
 	private static final String MENU_OPTION_RETURN_TO_MAIN = "Return to main menu";
 
@@ -39,24 +40,24 @@ public class TraveltodoApplication {
 														MAIN_MENU_OPTION_LOGOUT };
 
 
-	//Logout
+	// Constants Logout
 	private static final String OPTION_YES = "Yes";
 	private static final String OPTION_NO = "No";
 	private static final String[] LOGOUT_OPTIONS = { OPTION_YES,
 													 OPTION_NO };
 
-	//User menu options
+	// Constants User menu options
 	private static final String USERS_MENU_OPTION_ALL_USERS = "Show all users";
 	private static final String USER_MENU_OPTION_UPDATE_NAME = "Update user name";
 	private static final String USER_MENU_OPTION_UPDATE_PASSWORD = "Update user password";
-	private static final String USER_MENU_OPTION_DELETE_USER = "Delete user";
+	private static final String USER_MENU_OPTION_DELETE_USER = "Delete your account";
 	private static final String[] USER_MENU_OPTION = new String[]{ USERS_MENU_OPTION_ALL_USERS,
 																   USER_MENU_OPTION_UPDATE_NAME,
 																   USER_MENU_OPTION_UPDATE_PASSWORD,
 																   USER_MENU_OPTION_DELETE_USER,
 																   MENU_OPTION_RETURN_TO_MAIN };
 
-	//Wish to see menu options
+	// Constants Wish to see menu options
 
 	private static final String WISH_MENU_OPTION_ALL_WISH = "Show all wishes";
 	private static final String WISH_MENU_OPTION_SEARCH_BY_USER = "See user wishlist";
@@ -72,9 +73,11 @@ public class TraveltodoApplication {
 																	WISH_MENU_OPTION_CREATE,
 			  													    MENU_OPTION_RETURN_TO_MAIN };
 
+	// Fields
 	private final Menu menu;
 	private final UserDao userDao;
 	private final WishToSeeDao wishToSeeDao;
+	private User user = null;
 
 
 	public TraveltodoApplication(DataSource dataSource) {
@@ -100,7 +103,7 @@ public class TraveltodoApplication {
 		boolean running = true;
 		while (running) {
 			if(isLogin) {
-				menu.printHeadLine("Main Menu \n You are logged in");
+				menu.printHeadLine("Main Menu \n " + this.user.getName().toUpperCase() + " is logged in" );
 				String choice = (String)menu.getChoiceFromOptions(LOGIN_MENU_OPTION);
 
 				if(choice.equals(MAIN_MENU_OPTION_USERS)) {
@@ -139,13 +142,19 @@ public class TraveltodoApplication {
 		String userName = this.getUserInput("username: ");
 		String password = this.getUserInput("password: ");
 
-		User user = userDao.findByUserName(userName);
-		if(user.getPassword().equals(password)) {
-			System.out.println("Login successful");
-			isLogin = true;
-		} else {
-			System.out.println("Login is not success");
+
+		try {
+			this.user = userDao.findByUserName(userName);
+			if(user.getPassword().equals(password)) {
+				System.out.println("Login successful");
+				isLogin = true;
+			} else {
+				System.out.println("Login is not success. Please, make sure username or password are correct!");
+			}
+		} catch (Exception exception){
+			System.out.println("User does not exist!");
 		}
+
 	}
 
 	//User menu option creating
@@ -154,7 +163,9 @@ public class TraveltodoApplication {
 			menu.printHeadLine("Users menu");
 			String choice = (String)menu.getChoiceFromOptions(USER_MENU_OPTION);
 			if(choice.equals(USER_MENU_OPTION_DELETE_USER)){
-				this.handleDeleteUser();
+				if(handleDeleteUser()) {
+					break;
+				}
 			}else if(choice.equals(USER_MENU_OPTION_UPDATE_NAME)){
 				this.handleUpdateUserName();
 			}else if(choice.equals(USER_MENU_OPTION_UPDATE_PASSWORD)){
@@ -170,22 +181,26 @@ public class TraveltodoApplication {
 	private void handleAddNewUser(){
 		String userName = this.getUserInput("Enter user name: ");
 		String password = this.getUserInput("Enter password: ");
-
-		User newUser = new User(0, userName, password);
-		this.userDao.create(newUser);
-		System.out.println("Account created successfully!");
+		try {
+			User newUser = new User(0, userName, password);
+			this.userDao.create(newUser);
+			System.out.println("Account created successfully!");
+		} catch (Exception exception) {
+			System.out.println("This user has already created.");
+		}
 	}
 
-	private void handleDeleteUser(){
-		menu.printHeadLine("User delete");
-		String userName = getUserInput("Enter user name: ");
-		User user = this.userDao.findByUserName(userName.toLowerCase(Locale.ROOT));
-		if (user != null){
-			this.userDao.deleteUser(user.getId());
+	private boolean handleDeleteUser(){
+
+		menu.printHeadLine("Delete your account");
+		System.out.println("Are you sure you want to delete your account");
+		String deleteYourAccountChoice = (String)menu.getChoiceFromOptions(LOGOUT_OPTIONS);
+		if(deleteYourAccountChoice.equals(OPTION_YES)) {
+			userDao.deleteUser(user.getId());
+			isLogin = false;
+			return true;
 		}
-		else{
-			System.out.println("\n*** User '" + userName + "' does not exist. Please try again.");
-		}
+		return false;
 	}
 
 	private void handleUpdateUserName(){
@@ -204,10 +219,13 @@ public class TraveltodoApplication {
 	private void handleUpdateUserPassword(){
 		menu.printHeadLine("Update user password");
 		String name = getUserInput("Enter user name: ");
-		User user = userDao.findByUserName(name.toLowerCase());
-		User updatedUserPassword = menu.updateUserPassword(user);
-		userDao.updateUserPassword(updatedUserPassword);
-
+		try {
+			User user = userDao.findByUserName(name.toLowerCase());
+			User updatedUserPassword = menu.updateUserPassword(user);
+			userDao.updateUserPassword(updatedUserPassword);
+		} catch (Exception exception) {
+			System.out.println("Be sure user name is correct!");
+		}
 	}
 
 	private void listUsers(List<User> users){
@@ -274,8 +292,13 @@ public class TraveltodoApplication {
 		menu.printHeadLine("Delete wish");
 		String placeName = getUserInput("Enter place name ");
 		WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase());
+
 		if (place != null){
-			wishToSeeDao.delete(place.getWishId());
+			if(place.getUserId() == this.user.getId()){
+				wishToSeeDao.delete(place.getWishId());
+			} else {
+				System.out.println("The users can only delete their own wishes");
+			}
 		}
 		else{
 			System.out.println("\n*** User '" + place + "' does not exist. Please try again.");

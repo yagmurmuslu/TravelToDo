@@ -67,7 +67,7 @@ public class Menu {
                 choice = options[selectedOption - 1];
             }
         } catch (NumberFormatException exception) {
-
+            return null;
         }
         if(choice == null){
             out.println("\n*** " + userInput + " is not a valid option *** \n");
