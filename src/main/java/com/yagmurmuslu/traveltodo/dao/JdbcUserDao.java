@@ -60,6 +60,7 @@ public class JdbcUserDao implements UserDao{
 
     @Override
     public void deleteUser(int userId) {
+        jdbcTemplate.update("DELETE FROM wish_to_see WHERE user_id = ?", userId);
         jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", userId);
     }
 
