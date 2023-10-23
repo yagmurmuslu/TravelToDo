@@ -12,7 +12,7 @@ public interface WishToSeeDao {
 
     WishToSee listByWishId(int wishId);
 
-    WishToSee listByPlace (String placeName);
+    WishToSee listByPlace (String placeName, String city);
 
     List<WishToSee> listByCity(String cityName);
 

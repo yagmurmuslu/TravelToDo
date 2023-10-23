@@ -291,17 +291,22 @@ public class TraveltodoApplication {
 	private void handleDeleteWish(){
 		menu.printHeadLine("Delete wish");
 		String placeName = getUserInput("Enter place name ");
-		WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase());
+		String cityName =	getUserInput("Enter city name ");
+		WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase(), cityName.toLowerCase());
 
 		if (place != null){
-			if(place.getUserId() == this.user.getId()){
-				wishToSeeDao.delete(place.getWishId());
-			} else {
-				System.out.println("The users can only delete their own wishes");
+			try {
+				if(place.getUserId() == this.user.getId()){
+					wishToSeeDao.delete(place.getWishId());
+				} else {
+					System.out.println("The users can only delete their own wishes");
+				}
+			} catch (Exception exception) {
+					System.out.println("Please, whole write place name");
 			}
-		}
-		else{
-			System.out.println("\n*** User '" + place + "' does not exist. Please try again.");
+		} else {
+				System.out.println("\n*** User '" + place + "' does not exist. Please try again.");
+
 		}
 	}
 
@@ -322,18 +327,22 @@ public class TraveltodoApplication {
 
 	private void handleWishlistUpdate(){
 		menu.printHeadLine("Wish update");
-		String placeName = getUserInput("Enter place name");
-		WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase());
-		String cityName = getUserInput("Enter city name");
-		place.setCity(cityName.toLowerCase());
-		wishToSeeDao.update(place);
+		String placeName = getUserInput("Enter place name ");
+		String cityName = getUserInput("Enter city name ");
+		try {
+			WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase(), cityName.toLowerCase());
+			String city = getUserInput("Enter city name");
+			place.setCity(city.toLowerCase());
+			wishToSeeDao.update(place);
+		} catch (Exception exception) {
+			System.out.println("Please make sure write hole place name.");
+		}
+
 	}
 
 	private void handleCreateNewPlace(){
 		menu.printHeadLine("Wish create");
-		String userName = getUserInput("Enter user name");
-		User user = userDao.findByUserName(userName.toLowerCase());
-		int userId = user.getId();
+		int userId = this.user.getId();
 
 		String placeName = getUserInput("Enter place name");
 		String cityName = getUserInput("Enter city name");

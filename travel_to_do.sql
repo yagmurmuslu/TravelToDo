@@ -11,7 +11,8 @@ CREATE TABLE users(
 	user_id SERIAL,
 	name varchar(50) NOT NULL UNIQUE,
 	password_hash varchar(200) NOT NULL,
-	CONSTRAINT PK_user PRIMARY KEY (user_id)
+	CONSTRAINT PK_user PRIMARY KEY (user_id),
+	CONSTRAINT UC_user_name UNIQUE (name)
 );
 
 INSERT INTO users(name, password_hash) VALUES ('user1', 'user1password');
@@ -26,7 +27,8 @@ CREATE TABLE wish_to_see(
 	completed boolean,
 	user_id int NOT NULL,
 	CONSTRAINT PK_wishToSee PRIMARY KEY (wish_id),
-	CONSTRAINT FK_wishToSee_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+	CONSTRAINT FK_wishToSee_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+	CONSTRAINT UC_wishToSee_city_place_name UNIQUE (city, place_name)
 );
 
 INSERT INTO wish_to_see (city, place_name, address, for_kids, completed, user_id) VALUES

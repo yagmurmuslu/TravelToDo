@@ -1,6 +1,7 @@
 package com.yagmurmuslu.traveltodo.dao;
 
 import com.yagmurmuslu.traveltodo.model.WishToSee;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -50,12 +51,13 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
     }
 
     @Override
-    public WishToSee listByPlace(String placeName) {
+    public WishToSee listByPlace(String placeName, String city) {
         try{
             return jdbcTemplate.queryForObject(
-                    "SELECT * FROM wish_to_see WHERE LOWER(place_name) = ?",
+                    "SELECT * FROM wish_to_see WHERE LOWER(place_name) = ? AND LOWER(city) = ?",
                     this::mapRowToWishToSee,
-                    placeName
+                    placeName,
+                    city
             );
         } catch ( EmptyResultDataAccessException exception) {
             return null;
@@ -77,18 +79,23 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
 
     @Override
     public WishToSee createNewOne(WishToSee newWishToSee) {
-        Integer newPlace = jdbcTemplate.queryForObject(
-                "INSERT INTO wish_to_see (city, place_name, address, for_kids, completed, user_id)" +
-                        "VALUES (?, ?, ?, ?, ?, ? ) RETURNING wish_id;",
-                Integer.class,
-                newWishToSee.getCity(),
-                newWishToSee.getPlaceName(),
-                newWishToSee.getAddress(),
-                newWishToSee.getForKids(),
-                newWishToSee.getCompleted(),
-                newWishToSee.getUserId()
-        );
-        return listByWishId(newPlace);
+        try {
+            Integer newPlace = jdbcTemplate.queryForObject(
+                    "INSERT INTO wish_to_see (city, place_name, address, for_kids, completed, user_id)" +
+                            "VALUES (?, ?, ?, ?, ?, ? ) RETURNING wish_id;",
+                    Integer.class,
+                    newWishToSee.getCity(),
+                    newWishToSee.getPlaceName(),
+                    newWishToSee.getAddress(),
+                    newWishToSee.getForKids(),
+                    newWishToSee.getCompleted(),
+                    newWishToSee.getUserId()
+            );
+            return listByWishId(newPlace);
+        } catch (DuplicateKeyException exception) {
+            System.out.println("Your place and city name already added!");
+            return null;
+        }
     }
 
     @Override
