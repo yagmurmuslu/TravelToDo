@@ -10,6 +10,7 @@ import com.yagmurmuslu.traveltodo.view.Menu;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -79,6 +80,7 @@ public class TraveltodoApplication {
 	private final WishToSeeDao wishToSeeDao;
 	private User user = null;
 
+	private final HashMap<Integer, User> userCache = new HashMap<>();
 
 	public TraveltodoApplication(DataSource dataSource) {
 		this.menu = new Menu(System.in, System.out);
@@ -178,9 +180,17 @@ public class TraveltodoApplication {
 		}
 	}
 
-	private void handleAddNewUser(){
+	private void handleAddNewUser() {
 		String userName = this.getUserInput("Enter user name: ");
 		String password = this.getUserInput("Enter password: ");
+
+		String passwordConfirmation = this.getUserInput("Enter password again: ");
+		if (!password.equals(passwordConfirmation))
+		{
+			System.out.println("Passwords do not match.");
+			return;
+		}
+
 		try {
 			User newUser = new User(0, userName, password);
 			this.userDao.create(newUser);
@@ -270,10 +280,17 @@ public class TraveltodoApplication {
 	}
 
 	private void listWishes(List<WishToSee> wishes) {
+
 		System.out.println();
 		if(wishes.size() > 0){
 			for(WishToSee wish: wishes){
-				User user = userDao.getUserById(wish.getUserId());
+				int userId = wish.getUserId();
+				User user = this.userCache.get(userId);
+				if (user == null)
+				{
+					user = userDao.getUserById(userId);
+					this.userCache.put(userId, user);
+				}
 
 				System.out.println(wish.getPlaceName() + " in " + wish.getCity() + " by " + user.getName());
 			}
@@ -292,7 +309,7 @@ public class TraveltodoApplication {
 		menu.printHeadLine("Delete wish");
 		String placeName = getUserInput("Enter place name ");
 		String cityName =	getUserInput("Enter city name ");
-		WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase(), cityName.toLowerCase());
+		WishToSee place = wishToSeeDao.listByPlace(placeName, cityName);
 
 		if (place != null){
 			try {
@@ -305,8 +322,7 @@ public class TraveltodoApplication {
 					System.out.println("Please, whole write place name");
 			}
 		} else {
-				System.out.println("\n*** User '" + place + "' does not exist. Please try again.");
-
+				System.out.println("\n*** Place " + placeName + " (" + cityName + ") does not exist.");
 		}
 	}
 
@@ -330,12 +346,12 @@ public class TraveltodoApplication {
 		String placeName = getUserInput("Enter place name ");
 		String cityName = getUserInput("Enter city name ");
 		try {
-			WishToSee place = wishToSeeDao.listByPlace(placeName.toLowerCase(), cityName.toLowerCase());
-			String city = getUserInput("Enter city name");
-			place.setCity(city.toLowerCase());
+			WishToSee place = wishToSeeDao.listByPlace(placeName, cityName);
+			String city = getUserInput("Enter updated city name");
+			place.setCity(city);
 			wishToSeeDao.update(place);
 		} catch (Exception exception) {
-			System.out.println("Please make sure write hole place name.");
+			System.out.println("Please make sure write whole place name.");
 		}
 
 	}

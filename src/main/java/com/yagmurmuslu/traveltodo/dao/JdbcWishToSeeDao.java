@@ -54,7 +54,7 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
     public WishToSee listByPlace(String placeName, String city) {
         try{
             return jdbcTemplate.queryForObject(
-                    "SELECT * FROM wish_to_see WHERE LOWER(place_name) = ? AND LOWER(city) = ?",
+                    "SELECT * FROM wish_to_see WHERE place_name = ? AND city = ?",
                     this::mapRowToWishToSee,
                     placeName,
                     city
@@ -105,7 +105,12 @@ public class JdbcWishToSeeDao implements WishToSeeDao{
 
     @Override
     public void delete(int wishId) {
-        jdbcTemplate.update("DELETE FROM wish_to_see WHERE wish_id = ?", wishId);
+        try {
+            jdbcTemplate.update("DELETE FROM wish_to_see WHERE wish_id = ?", wishId);
+        } catch (Exception exception) {
+            System.out.println("Please, type hole place name!");
+        }
+
 
     }
 
